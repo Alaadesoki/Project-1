@@ -5,26 +5,34 @@
  */
 package com.project;
 
+import com.project.Model.InvoiceHeaderTableModel;
+import com.project.Model.InvoiceLinesTableModel;
 import com.project.Model.Invoiceheader;
 import com.project.Model.Invoicelines;
+import com.project.View.InvoiceHeaderDialog;
+import com.project.View.InvoiceLineDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  *
  * @author 20120
  */
-public class InvoiceFrame extends javax.swing.JFrame implements ActionListener{
+public class InvoiceFrame extends javax.swing.JFrame implements ActionListener, ListSelectionListener {
 
     /**
      * Creates new form InvoiceFrame
@@ -44,6 +52,7 @@ public class InvoiceFrame extends javax.swing.JFrame implements ActionListener{
 
         jScrollPane1 = new javax.swing.JScrollPane();
         InvoicesTable = new javax.swing.JTable();
+        InvoicesTable.getSelectionModel().addListSelectionListener(this);
         CreateInvbtn = new javax.swing.JButton();
         CreateInvbtn.addActionListener(this);
         Deleteinvbtn = new javax.swing.JButton();
@@ -280,25 +289,46 @@ public class InvoiceFrame extends javax.swing.JFrame implements ActionListener{
     // End of variables declaration//GEN-END:variables
 private DateFormat df = new SimpleDateFormat ("dd-MM-yyyy");
 private List<Invoiceheader> invoicesList = new ArrayList<>();
+private InvoiceHeaderTableModel InvoiceHeaderTableModel;
+private InvoiceLinesTableModel InvoiceLinesTableModel;
+private InvoiceHeaderDialog HeaderDialog;
+private InvoiceLineDialog LineDialog;
     
     @Override
     public void actionPerformed(ActionEvent e) {
         
         switch (e.getActionCommand()){
           case "CreateNewInvoice":
-              
+              displayNewInvoiceDialog();
+              break;
           case "DeleteInvoice":
-              
+              deleteInvoice();
+              break;
           case "CreateNewLine":
-              
+              displayNewLineDialog();
+                break;
           case "DeleteLine":
-              
+              deleteLine();
+                break;
           case "LoadFile":
               loadFile();
-              
+              break;
           case "SaveFile":
               saveData();
-              
+              break;
+          case "createInvCancel":
+              createInvCancel();
+          break;
+          case "createInvOK":
+              createInvOK();
+          break;
+          case "createLineCancel":
+              createLineCancel();
+          break;
+          case "createLineOK":
+              createLineOK();
+          break;
+          
     }
         
 }
@@ -346,18 +376,54 @@ JOptionPane.showMessageDialog(this, "Please, Select lines file", "Attention", JO
                 Invoiceheader header = findInvoiceByNum(invNum);
                 Invoicelines invLine = new Invoicelines (itemName, itemPrice, itemCount, header);
                 header.getLines().add(invLine);
-            }       
+            }   
+            InvoiceHeaderTableModel = new InvoiceHeaderTableModel(invoicesList);
+            InvoicesTable.setModel(InvoiceHeaderTableModel);
+            InvoicesTable.validate();
+           }
+                System.out.println("Check");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
-        System.out.println("check");
+        displayInvoises();
+    }  
+     private void saveData() {
+             String headers = "";
+        String lines = "";
+        for (Invoiceheader header : invoicesList) {
+            headers += header.getDataAsCSV();
+            headers += "\n";
+            for (Invoicelines line : header.getLines()) {
+                lines += line.getDataAsCSV();
+                lines += "\n";
+            }
+        }
+        JOptionPane.showMessageDialog(this, "Please, select file to save header data!", "Attension", JOptionPane.WARNING_MESSAGE);
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File headerFile = fileChooser.getSelectedFile();
+            try {
+                FileWriter hFW = new FileWriter(headerFile);
+                hFW.write(headers);
+                hFW.flush();
+                hFW.close();
+        JOptionPane.showMessageDialog(this, "Please, select file to save lines data!", "Attension", JOptionPane.WARNING_MESSAGE);
+                result = fileChooser.showSaveDialog(this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File linesFile = fileChooser.getSelectedFile();
+                    FileWriter lFW = new FileWriter(linesFile);
+                    lFW.write(lines);
+                    lFW.flush();
+                    lFW.close();
+                }
+                 } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
 
-    } catch(Exception ex){
-           ex.printStackTrace();
-       }      
     }
-}
-        private void saveData() {
-            
-        }
         
         private Invoiceheader findInvoiceByNum(int InvNum) {
             Invoiceheader header = null;
@@ -370,4 +436,131 @@ JOptionPane.showMessageDialog(this, "Please, Select lines file", "Attention", JO
         return header;
         
      }
-}
+
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        System.out.println("Invoice Selevcted");
+        invoicesTableRowSelected();
+    }
+
+    private void invoicesTableRowSelected() {
+         int selectedRowIndex = InvoicesTable.getSelectedRow();
+        if (selectedRowIndex >= 0) {
+            Invoiceheader row = InvoiceHeaderTableModel.getInvoicesList().get(selectedRowIndex);
+            CustomernameTF.setText(row.getCustomername());
+            InvoicedateTF.setText(df.format(row.getInvdate()));
+            InvoicenumberLB.setText("" + row.getInvnum());
+            InvoicetotalLB.setText("" + row.getInvTotal());
+            ArrayList<Invoicelines> lines = row.getLines();
+            InvoiceLinesTableModel = new InvoiceLinesTableModel(lines);
+            InvLinesTable.setModel(InvoiceLinesTableModel);
+            InvoiceLinesTableModel.fireTableDataChanged();
+        }    
+    }
+
+    private void displayNewInvoiceDialog() {
+        HeaderDialog = new InvoiceHeaderDialog(this); 
+        HeaderDialog.setVisible(true); 
+    }
+     
+    private void displayNewLineDialog() {
+        LineDialog = new InvoiceLineDialog(this);
+        LineDialog.setVisible(true);
+    }
+
+    private void createInvCancel() {
+        HeaderDialog.setVisible(false);
+        HeaderDialog.dispose();
+        HeaderDialog = null;
+    }
+
+    private void createInvOK() {
+        String CustName = HeaderDialog.getCustNameField().getText();
+        String InvDateStr = HeaderDialog.getInvDateField().getText();  
+        HeaderDialog.setVisible(false);
+        HeaderDialog.dispose();
+        HeaderDialog = null;
+        
+        try {
+            Date InvDate = df.parse(InvDateStr);
+          int InNum = getNextInvoiceNum(); 
+          Invoiceheader Invoiceheader = new Invoiceheader (InNum,CustName, InvDate);
+          invoicesList.add(Invoiceheader);
+          InvoiceHeaderTableModel.fireTableDataChanged();
+          
+        } catch (ParseException ex) {
+            ex.printStackTrace();  
+        }
+       displayInvoises();
+ }       
+       private int getNextInvoiceNum() {
+           int max = 0;
+        for (Invoiceheader header : invoicesList) {
+            if (header.getInvnum()> max) {
+                max = header.getInvnum();
+            }
+       }
+           
+      return max + 1;
+     }
+
+    private void createLineCancel() {
+        LineDialog.setVisible(false);
+        LineDialog.dispose();
+        LineDialog = null;
+    }
+
+    private void createLineOK() {
+        String itemName = LineDialog.getItemNameField().getText();
+        String itemCountStr = LineDialog.getItemCountField().getText();
+        String itemPriceStr = LineDialog.getItemPriceField().getText();
+        LineDialog.setVisible(false);
+        LineDialog.dispose();
+        LineDialog = null;
+        int itemCount = Integer.parseInt(itemCountStr);
+        double itemPrice = Double.parseDouble(itemPriceStr);
+        int headerIndex = InvoicesTable.getSelectedRow();
+        Invoiceheader invoice = InvoiceHeaderTableModel.getInvoicesList().get(headerIndex);
+        
+        Invoicelines invoiceLine = new Invoicelines(itemName, itemPrice, itemCount, invoice);
+        invoice.addInvLine(invoiceLine);
+        InvoiceLinesTableModel.fireTableDataChanged();
+        InvoiceHeaderTableModel.fireTableDataChanged();
+        InvoicetotalLB.setText("" + invoice.getInvTotal());
+        displayInvoises();
+    }    
+
+    private void deleteInvoice() {
+        int invIndex = InvoicesTable.getSelectedRow();
+        Invoiceheader header = InvoiceHeaderTableModel.getInvoicesList().get(invIndex);
+        InvoiceHeaderTableModel.getInvoicesList().remove(invIndex);
+        InvoiceHeaderTableModel.fireTableDataChanged();
+        InvoiceLinesTableModel = new InvoiceLinesTableModel(new ArrayList<Invoicelines>());
+        InvLinesTable.setModel(InvoiceLinesTableModel);
+        InvoiceHeaderTableModel.fireTableDataChanged();
+        CustomernameTF.setText("");
+        InvoicedateTF.setText("");
+        InvoicenumberLB.setText("");
+        InvoicetotalLB.setText("");
+        displayInvoises();
+    }
+
+    private void deleteLine() {
+        int lineIndex = InvLinesTable.getSelectedRow();
+        Invoicelines line = InvoiceLinesTableModel.getInvoiceLines().get(lineIndex);
+        InvoiceLinesTableModel.getInvoiceLines().remove(lineIndex);
+        InvoiceLinesTableModel.fireTableDataChanged();
+        InvoiceLinesTableModel.fireTableDataChanged();
+        InvoicetotalLB.setText("" + line.getHeader().getInvTotal());
+        displayInvoises();
+    }
+
+    private void displayInvoises() {
+    System.out.println("***************************");
+        for (Invoiceheader header : invoicesList) {
+            System.out.println(header);
+        }
+        System.out.println("***************************");
+    }
+
+    }

@@ -1,6 +1,8 @@
 
 package com.project.Model;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -44,10 +46,14 @@ public class Invoiceheader {
     }
 
     @Override
-    public String toString() {
-        return "Invoiceheader{" + "Invnum=" + Invnum + ", customername=" + customername + ", Invdate=" + Invdate + '}';
+    public String toString(){
+        String str = "InvoiceHeader{" + "invNum=" + Invnum + ", customerName=" + customername + ", invDate=" + Invdate + '}';
+        for (Invoicelines line : getLines()) {
+            str += "\n\t" + line;
+        }
+        return str;
     }
-
+    
     public ArrayList<Invoicelines> getLines(){
         if (lines == null)
             lines = new ArrayList<>(); //leasy creation
@@ -61,14 +67,16 @@ public class Invoiceheader {
     public double getInvTotal() {
         double total = 0.0;
         for (Invoicelines line : getLines()){
-            total += line.getLineTot();
+            total += line.getLineTotal();
         }
         return total;
-       
-    }
-    public void addinvlines (Invoicelines lines){
-        getLines ().add(lines);
     }
     
-
-}
+    public void addInvLine(Invoicelines line) {
+        getLines().add(line);
+    }   
+    public String getDataAsCSV() {
+        DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+        return "" + getInvnum() + "," + df.format(getInvdate()) + "," + getCustomername();
+    }
+}  

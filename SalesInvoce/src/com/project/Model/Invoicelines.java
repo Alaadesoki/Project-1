@@ -50,10 +50,14 @@ public class Invoicelines {
 
     @Override
     public String toString() {
-        return "Invoicelines{" + "itemName=" + itemName + ", itemprice=" + itemPrice + ", itemCount=" + itemCount + '}';
-    }  
-    public double getLineTot(){
+        return "InvoiceLine{" + "itemName=" + itemName + ", itemprice=" + itemPrice + ", itemCount=" + itemCount + '}';
+    }
+    
+    public double getLineTotal() {
         return itemCount * itemPrice;
     }
-  
+    
+    public String getDataAsCSV() {
+        return "" + getHeader().getInvnum() + "," + getItemName() + "," + getItemPrice() + "," + getItemCount();
+    }
 }
