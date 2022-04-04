@@ -6,6 +6,8 @@
 package com.project.Model;
 
 
+import com.project.Model.Invoiceheader;
+import com.project.Model.Invoiceheader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -80,6 +82,7 @@ public class InvoiceHeaderTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
      Invoiceheader row = invoicesList.get(rowIndex);
+     
      switch (columnIndex){
             case 0:
                 return row.getInvnum();

@@ -5,8 +5,8 @@
  */
 package com.project;
 
-import com.project.Model.InvoiceHeaderTableModel;
 import com.project.Model.InvoiceLinesTableModel;
+import com.project.Model.InvoiceHeaderTableModel;
 import com.project.Model.Invoiceheader;
 import com.project.Model.Invoicelines;
 import com.project.View.InvoiceHeaderDialog;
@@ -80,6 +80,7 @@ public class InvoiceFrame extends javax.swing.JFrame implements ActionListener, 
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        InvoicesTable.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         InvoicesTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -88,9 +89,10 @@ public class InvoiceFrame extends javax.swing.JFrame implements ActionListener, 
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "No.", "Date ", "Name", "Total"
             }
         ));
+        InvoicesTable.setName("Invoices Table"); // NOI18N
         jScrollPane1.setViewportView(InvoicesTable);
 
         CreateInvbtn.setText("Create New Invoice");
@@ -107,6 +109,7 @@ public class InvoiceFrame extends javax.swing.JFrame implements ActionListener, 
 
         jLabel4.setText("Invoice Total");
 
+        InvLinesTable.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         InvLinesTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -115,9 +118,10 @@ public class InvoiceFrame extends javax.swing.JFrame implements ActionListener, 
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Item Name", "Item Price ", "Count ", "Total"
             }
         ));
+        InvLinesTable.setName("Invoice Items"); // NOI18N
         jScrollPane2.setViewportView(InvLinesTable);
 
         CreateLineBtn.setText("Create New Line");
@@ -304,12 +308,15 @@ private InvoiceLineDialog LineDialog;
           case "DeleteInvoice":
               deleteInvoice();
               break;
+              
           case "CreateNewLine":
               displayNewLineDialog();
                 break;
+                
           case "DeleteLine":
               deleteLine();
                 break;
+                
           case "LoadFile":
               loadFile();
               break;
@@ -480,14 +487,12 @@ JOptionPane.showMessageDialog(this, "Please, Select lines file", "Attention", JO
         HeaderDialog.setVisible(false);
         HeaderDialog.dispose();
         HeaderDialog = null;
-        
         try {
             Date InvDate = df.parse(InvDateStr);
           int InNum = getNextInvoiceNum(); 
           Invoiceheader Invoiceheader = new Invoiceheader (InNum,CustName, InvDate);
           invoicesList.add(Invoiceheader);
           InvoiceHeaderTableModel.fireTableDataChanged();
-          
         } catch (ParseException ex) {
             ex.printStackTrace();  
         }

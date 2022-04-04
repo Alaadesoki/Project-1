@@ -5,6 +5,7 @@
  */
 package com.project.Model;
 
+import com.project.Model.Invoicelines;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -87,7 +88,7 @@ public class InvoiceLinesTableModel extends AbstractTableModel {
             case 2:
                 return row.getItemCount();
             case 3:
-                return row.getLineTotal();
+                return row.getTotal();
                 default:
                     return "";
         }

@@ -53,7 +53,7 @@ public class Invoicelines {
         return "InvoiceLine{" + "itemName=" + itemName + ", itemprice=" + itemPrice + ", itemCount=" + itemCount + '}';
     }
     
-    public double getLineTotal() {
+    public double getTotal() {
         return itemCount * itemPrice;
     }
     

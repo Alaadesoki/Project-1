@@ -67,7 +67,7 @@ public class Invoiceheader {
     public double getInvTotal() {
         double total = 0.0;
         for (Invoicelines line : getLines()){
-            total += line.getLineTotal();
+            total += line.getTotal();
         }
         return total;
     }
