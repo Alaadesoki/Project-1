@@ -5,8 +5,8 @@
  */
 package com.project.View;
 
-import com.project.InvoiceFrame;
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -46,8 +46,8 @@ public class InvoiceLineDialog extends JDialog{
         okBtn.setActionCommand("createLineOK");
         cancelBtn.setActionCommand("createLineCancel");
         
-        okBtn.addActionListener(frame);
-        cancelBtn.addActionListener(frame);
+        okBtn.addActionListener(frame.getListener());
+        cancelBtn.addActionListener(frame.getListener());
         setLayout(new GridLayout(4, 2));
         
         add(itemNameLbl);

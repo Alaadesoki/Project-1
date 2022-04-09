@@ -7,7 +7,6 @@ package com.project.Model;
 
 
 import com.project.Model.Invoiceheader;
-import com.project.Model.Invoiceheader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
